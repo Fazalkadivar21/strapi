@@ -30,20 +30,16 @@ RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml ./
 
 # Install production dependencies only
-RUN pnpm install --frozen-lockfile --prod
+RUN pnpm install --frozen-lockfile
 
-# Copy built application from builder
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/.cache ./.cache
-
-# Copy configuration files
-COPY config ./config
-COPY src ./src
-COPY public ./public
-COPY types ./types
+# Copy EVERYTHING from builder (entire source code + built files)
+COPY --from=builder /app ./
 
 # Expose port
 EXPOSE 1337
+
+# Set Node.js to prefer IPv4
+ENV NODE_OPTIONS="--dns-result-order=ipv4first"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
